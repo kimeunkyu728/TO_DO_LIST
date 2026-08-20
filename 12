@@ -1,0 +1,884 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#12151a;
+    --surface:#1b1f27;
+    --surface-2:#232834;
+    --line:#2c313d;
+    --text:#e8e6e1;
+    --text-dim:#8b93a3;
+    --accent:#e3b341;
+    --accent-dim:#7a6229;
+    --ok:#4fd1c5;
+    --fail:#e5636a;
+    --partial:#7fa8e0;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  body,.qapp{margin:0;padding:0;}
+  .qapp{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    min-height:100%;
+    max-width:480px;
+    margin:0 auto;
+    padding-bottom:84px;
+    position:relative;
+  }
+  .qapp *{ -webkit-tap-highlight-color: transparent; }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .disp{font-family:'Space Grotesk',sans-serif;}
+
+  /* header */
+  .qhead{
+    padding:22px 20px 16px;
+    border-bottom:1px solid var(--line);
+  }
+  .qhead .eyebrow{
+    font-size:11px;letter-spacing:.14em;color:var(--accent);
+    text-transform:uppercase;margin-bottom:4px;
+  }
+  .qhead h1{
+    font-size:20px;margin:0;font-weight:700;
+  }
+  .qhead.todayhead{display:flex;justify-content:space-between;align-items:center;}
+  .qhead.todayhead .lefttitle .eyebrow{margin-bottom:2px;}
+  .qhead.todayhead .lefttitle h1{font-size:19px;}
+  .todaydate{
+    font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;
+    color:var(--accent);text-align:right;line-height:1.15;white-space:nowrap;flex-shrink:0;margin-left:12px;
+  }
+
+  .qmain{padding:18px 20px 8px;}
+
+  /* card */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .qcard-label{
+    font-size:11px;letter-spacing:.1em;color:var(--text-dim);
+    text-transform:uppercase;margin-bottom:8px;
+  }
+  .qtitle{font-size:19px;font-weight:700;margin:0 0 10px;line-height:1.35;}
+  .qdesc{font-size:14.5px;color:#c7c9d1;line-height:1.6;margin:0 0 14px;white-space:pre-wrap;}
+  .qmeta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .pill{
+    font-size:12px;padding:4px 10px;border-radius:999px;
+    background:var(--surface-2);color:var(--text-dim);border:1px solid var(--line);
+  }
+  .tips{margin:0;padding-left:18px;font-size:13.5px;color:#a9adb8;line-height:1.7;}
+  .coachnote{
+    margin-top:12px;padding:10px 12px;background:rgba(227,179,65,.08);
+    border-left:3px solid var(--accent);border-radius:6px;
+    font-size:13px;color:#d8c896;line-height:1.55;
+  }
+
+  /* status controls */
+  .seg{display:flex;gap:8px;margin:14px 0 10px;}
+  .seg button{
+    flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--text-dim);font-size:13.5px;font-weight:600;
+    cursor:pointer;transition:.15s;
+  }
+  .seg button.active{background:rgba(227,179,65,.15);border-color:var(--accent);color:var(--accent);}
+  .seg button.active[data-v="success"]{background:rgba(79,209,197,.15);border-color:var(--ok);color:var(--ok);}
+  .seg button.active[data-v="fail"]{background:rgba(229,99,106,.15);border-color:var(--fail);color:var(--fail);}
+  .seg button.active[data-v="partial"]{background:rgba(127,168,224,.15);border-color:var(--partial);color:var(--partial);}
+
+  .routine-row{
+    display:flex;align-items:center;gap:12px;padding:12px 16px;
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    margin-bottom:8px;cursor:pointer;
+  }
+
+  .pctrow{display:none;align-items:center;gap:10px;margin:6px 0 14px;}
+  .pctrow.show{display:flex;}
+  .pctrow input[type=range]{flex:1;accent-color:var(--partial);}
+  .pctval{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--partial);width:42px;text-align:right;}
+
+  textarea{
+    width:100%;min-height:74px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 12px;font-size:13.5px;font-family:inherit;resize:vertical;
+    margin-bottom:12px;line-height:1.5;
+  }
+  textarea::placeholder{color:#666c7a;}
+  .noteHint{font-size:11.5px;color:var(--text-dim);margin:-8px 0 10px;}
+
+  .btn{
+    width:100%;padding:13px;border-radius:10px;border:none;
+    background:var(--accent);color:#1a1305;font-weight:700;font-size:14.5px;
+    cursor:pointer;
+  }
+  .btn:disabled{background:var(--accent-dim);color:#8a7a4a;cursor:default;}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text-dim);font-weight:600;}
+  .btn.small{padding:9px;font-size:13px;}
+  .btn.danger{background:transparent;border:1px solid var(--fail);color:var(--fail);font-weight:600;}
+
+  .doneBadge{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;}
+  .dot.success{background:var(--ok);} .dot.fail{background:var(--fail);} .dot.partial{background:var(--partial);}
+
+  /* onboarding / forms */
+  .onbd p.sub{color:var(--text-dim);font-size:13.5px;margin:0 0 18px;line-height:1.6;}
+  label.flabel{display:block;font-size:12px;color:var(--text-dim);margin:14px 0 6px;letter-spacing:.02em;}
+  input[type=text],input[type=date]{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:10px;color:var(--text);padding:11px 12px;font-size:14px;font-family:inherit;
+  }
+  input[type=date]{color-scheme:dark;}
+
+  /* checklist (today) */
+  .clist-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  .clist-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
+  .clist-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:transparent;}
+  .clist-check.success{border-color:var(--ok);background:rgba(79,209,197,.15);color:var(--ok);}
+  .clist-check.fail{border-color:var(--fail);background:rgba(229,99,106,.15);color:var(--fail);}
+  .clist-check.partial{border-color:var(--partial);background:rgba(127,168,224,.15);color:var(--partial);font-size:9.5px;}
+  .clist-titles{flex:1;min-width:0;}
+  .clist-title{font-size:14.5px;font-weight:600;line-height:1.4;}
+  .clist-sub{font-size:11px;color:var(--text-dim);margin-top:2px;letter-spacing:.02em;}
+  .clist-chev{color:var(--text-dim);font-size:11px;flex-shrink:0;transition:transform .15s;}
+  .clist-item.open .clist-chev{transform:rotate(90deg);}
+  .clist-body{padding:2px 16px 16px;border-top:1px solid var(--line);}
+  .clist-body .qdesc{margin-top:14px;}
+
+  /* goal list */
+  .glist-item{padding:14px 0;border-bottom:1px solid var(--line);}
+  .glist-item:last-child{border-bottom:none;}
+  .glist-title{font-size:14.5px;font-weight:700;margin-bottom:5px;}
+  .glist-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+
+  /* calendar */
+  .cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .cal-nav button{background:none;border:1px solid var(--line);color:var(--text-dim);border-radius:8px;width:32px;height:32px;font-size:14px;cursor:pointer;}
+  .cal-title{font-weight:700;font-size:15px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .cal-dow{text-align:center;font-size:10.5px;color:var(--text-dim);padding-bottom:6px;}
+  .cal-cell{aspect-ratio:1;border-radius:10px;background:var(--surface-2);border:1px solid transparent;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;}
+  .cal-cell.empty{background:none;cursor:default;}
+  .cal-cell.future,.cal-cell.nodata{opacity:.4;cursor:default;}
+  .cal-cell.today{border-color:var(--accent);}
+  .cal-cell .cd-num{font-size:11px;color:var(--text-dim);}
+  .cal-cell .cd-pct{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:700;margin-top:1px;}
+  .cal-cell .cd-pct.hi{color:var(--ok);}
+  .cal-cell .cd-pct.mid{color:var(--partial);}
+  .cal-cell .cd-pct.lo{color:var(--fail);}
+
+  .detail-back{background:none;border:none;color:var(--text-dim);font-size:13px;cursor:pointer;margin-bottom:16px;padding:0;}
+  .bigpct{font-family:'IBM Plex Mono',monospace;font-size:38px;font-weight:700;color:var(--accent);line-height:1;}
+  .bigpct-label{font-size:12px;color:var(--text-dim);margin-top:4px;}
+
+  .empty-state{text-align:center;padding:36px 10px;color:var(--text-dim);font-size:13.5px;line-height:1.7;}
+
+  /* nav */
+  .qnav{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:480px;display:flex;
+    background:var(--surface);border-top:1px solid var(--line);
+    padding:10px 20px calc(10px + env(safe-area-inset-bottom));
+  }
+  .qnav button{
+    flex:1;background:none;border:none;color:var(--text-dim);
+    font-size:11.5px;font-weight:600;cursor:pointer;padding:6px 0;
+  }
+  .qnav button.active{color:var(--accent);}
+
+  .loadwrap{padding:40px 20px;text-align:center;color:var(--text-dim);font-size:13.5px;}
+  .spinner{
+    width:22px;height:22px;border:2px solid var(--line);border-top-color:var(--accent);
+    border-radius:50%;margin:0 auto 12px;animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .errbox{
+    background:rgba(229,99,106,.08);border:1px solid var(--fail);border-radius:10px;
+    padding:14px;font-size:13px;color:#f0aeb2;margin-bottom:14px;
+  }
+  .devrow{text-align:center;margin-top:6px;}
+  .devrow button{background:none;border:none;color:#565c69;font-size:11px;text-decoration:underline;cursor:pointer;}
+</style>
+
+<div class="qapp" id="qapp"></div>
+
+<script>
+(function(){
+  const root = document.getElementById('qapp');
+  let state = { goals: [], testOffset: 0, view: 'today', lastNotifiedDate: null };
+  let questCache = {}; // goalId -> array of records
+  let expandedGoalId = null; // runtime only
+  let editingIds = new Set(); // runtime only — goal ids currently being re-edited after being answered
+  let goalFormOpen = false;  // runtime only
+  let selectedDate = null;   // runtime only, for record detail view
+  let calCursor = null;      // runtime only {y,m}
+
+  function todayStr(){
+    const d = new Date(Date.now() + state.testOffset*86400000);
+    return d.toISOString().slice(0,10);
+  }
+  function daysBetween(a,b){
+    return Math.round((new Date(b)-new Date(a))/86400000);
+  }
+  function addDays(dateStr,n){
+    const d = new Date(dateStr); d.setDate(d.getDate()+n);
+    return d.toISOString().slice(0,10);
+  }
+  function fmtDateLong(dateStr){
+    const d = new Date(dateStr);
+    const dows = ['일','월','화','수','목','금','토'];
+    return `${d.getMonth()+1}월 ${d.getDate()}일 (${dows[d.getDay()]})`;
+  }
+  function escapeHtml(s){
+    return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function statusLabel(s){
+    return s==='success' ? '완료' : s==='fail' ? '실패' : s==='partial' ? '진행중' : '대기';
+  }
+
+  // ---------- storage ----------
+  async function loadState(){
+    try{
+      const r = await window.storage.get('app-state');
+      if(r && r.value) state = Object.assign(state, JSON.parse(r.value));
+    }catch(e){ /* first run */ }
+  }
+  async function saveState(){
+    try{ await window.storage.set('app-state', JSON.stringify(state)); }catch(e){ console.error(e); }
+  }
+  async function loadQuests(goalId){
+    if(questCache[goalId]) return questCache[goalId];
+    try{
+      const r = await window.storage.get('quests:'+goalId);
+      questCache[goalId] = r && r.value ? JSON.parse(r.value) : [];
+    }catch(e){ questCache[goalId] = []; }
+    return questCache[goalId];
+  }
+  async function saveQuests(goalId){
+    try{ await window.storage.set('quests:'+goalId, JSON.stringify(questCache[goalId]||[])); }
+    catch(e){ console.error(e); }
+  }
+  async function loadAllQuests(){
+    await Promise.all(state.goals.map(g=>loadQuests(g.id)));
+  }
+
+  function goalsActiveOn(dateStr){
+    return state.goals.filter(g=> g.startDate<=dateStr && dateStr<=g.endDate);
+  }
+  function roadmapGoalsOn(dateStr){ return goalsActiveOn(dateStr).filter(g=>g.type!=='routine'); }
+  function routineGoalsOn(dateStr){ return goalsActiveOn(dateStr).filter(g=>g.type==='routine'); }
+
+  // ---------- AI ----------
+  async function callAI(goal, history, dayIndex, totalDays){
+    const recent = history.slice(-14).map(h=>({
+      date:h.date, status:h.status, percent:h.percent||null, note:h.note||'', quest:h.questTitle
+    }));
+    const sys = `너는 사용자의 장기 목표를 매일 하나씩 실행 가능한 퀘스트로 쪼개주는 코치야.
+목표 정보와 지금까지의 실행 기록(성공/실패/진행률, 사용자 메모)을 참고해서 "오늘 하루" 퀘스트 딱 하나만 만들어.
+사용자의 최근 속도와 메모(피곤함, 여유로움, 실패 이유 등)를 반영해서 난이도를 조절해.
+연속 실패가 있으면 난이도를 낮추고, 연속 성공+여유 메모가 있으면 살짝 올려.
+출력은 짧고 간결하게 써. description은 2문장 이내, tips는 최대 2개, 각 항목 15자 이내, coachNote는 1문장 이내로 써.
+반드시 아래 JSON 형식으로만 응답해. 마크다운, 코드블록, 설명 문구, 줄바꿈 없이 순수 JSON 객체 한 줄만 출력해:
+{"title":"퀘스트 제목(20자 내외)","description":"무엇을 어떻게 할지 2문장 이내","estimatedMinutes":숫자,"tips":["짧은 팁1","짧은 팁2"],"coachNote":"난이도를 이렇게 잡은 이유 1문장"}`;
+
+    const user = `[목표] ${goal.title}
+[기간] ${goal.startDate} ~ ${goal.endDate} (총 ${totalDays}일)
+[진행] ${dayIndex}일차 / 총 ${totalDays}일
+[최근 기록] ${JSON.stringify(recent)}
+오늘(${todayStr()}) 퀘스트를 만들어줘.`;
+
+    const resp = await fetch("/api/quest", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ system: sys, user: user })
+    });
+    const data = await resp.json();
+    if(data.error){ console.error('AI error:', data.error); throw new Error(data.error.message || 'API 오류'); }
+    const textBlock = (data.content||[]).find(b=>b.type==='text');
+    if(!textBlock || !textBlock.text){ console.error('AI empty response:', data); throw new Error('AI 응답이 비어있어요'); }
+    let raw = textBlock.text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    const first = raw.indexOf('{');
+    const last = raw.lastIndexOf('}');
+    if(first===-1 || last===-1) throw new Error('AI 응답 형식이 올바르지 않아요');
+    raw = raw.slice(first, last+1);
+    let parsed;
+    try{ parsed = JSON.parse(raw); }
+    catch(e){ throw new Error('AI 응답을 해석하지 못했어요'); }
+    if(!parsed.title || !parsed.description) throw new Error('AI 응답에 필수 항목이 빠졌어요');
+    return parsed;
+  }
+
+  async function ensureTodayQuest(goal){
+    const list = await loadQuests(goal.id);
+    let today = list.find(r=>r.date===todayStr());
+    if(today) return today;
+
+    const dayIndex = daysBetween(goal.startDate, todayStr()) + 1;
+    const totalDays = daysBetween(goal.startDate, goal.endDate) + 1;
+    const ai = await callAI(goal, list, dayIndex, totalDays);
+    const rec = {
+      date: todayStr(), dayIndex, totalDays,
+      questTitle: ai.title, questDesc: ai.description,
+      estimatedMinutes: ai.estimatedMinutes, tips: ai.tips||[],
+      coachNote: ai.coachNote||'', status:'pending', percent:null, note:'', createdAt: Date.now()
+    };
+    list.push(rec);
+    questCache[goal.id] = list;
+    await saveQuests(goal.id);
+    return rec;
+  }
+
+  async function ensureTodayRoutine(goal){
+    const list = await loadQuests(goal.id);
+    let rec = list.find(r=>r.date===todayStr());
+    if(rec) return rec;
+    rec = { date: todayStr(), questTitle: goal.title, status:'pending', percent:null, note:'', createdAt: Date.now(), routine:true };
+    list.push(rec);
+    questCache[goal.id] = list;
+    await saveQuests(goal.id);
+    return rec;
+  }
+
+  // ---------- notifications ----------
+  function notifBanner(){
+    if(!('Notification' in window)) return '';
+    if(Notification.permission!=='default') return '';
+    return `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div style="font-size:12.5px;color:var(--text-dim);line-height:1.5;">매일 아침 7시에<br>"오늘 일정을 확인하세요" 알림 받기</div>
+      <button class="btn small" id="notifBtn" style="width:auto;padding:8px 14px;flex-shrink:0;">허용</button>
+    </div>`;
+  }
+  function bindNotifBanner(){
+    const btn = document.getElementById('notifBtn');
+    if(!btn) return;
+    btn.onclick = async ()=>{ await Notification.requestPermission(); render(); };
+  }
+  function maybeNotify(){
+    if(!('Notification' in window)) return;
+    if(Notification.permission!=='granted') return;
+    const now = new Date();
+    const realToday = now.toISOString().slice(0,10);
+    if(now.getHours()>=7 && state.lastNotifiedDate!==realToday){
+      try{ new Notification('오늘 일정을 확인하세요', {body:'오늘의 체크리스트가 준비되어 있어요.'}); }catch(e){}
+      state.lastNotifiedDate = realToday;
+      saveState();
+    }
+  }
+
+  // ---------- header ----------
+  function genericHeader(eyebrow, title){
+    return `<div class="qhead">
+      <div class="eyebrow">${eyebrow}</div>
+      <h1>${title}</h1>
+    </div>`;
+  }
+  function todayHeader(){
+    return `<div class="qhead todayhead">
+      <div class="lefttitle">
+        <div class="eyebrow">오늘</div>
+        <h1>오늘 할 일</h1>
+      </div>
+      <div class="todaydate">${fmtDateLong(todayStr())}</div>
+    </div>`;
+  }
+
+  // ================= TODAY (checklist) =================
+  function loadingShell(){
+    return `<div class="qmain">${notifBanner()}<div id="todaySlot"><div class="loadwrap"><div class="spinner"></div>오늘의 할 일을 준비하는 중...</div></div></div>`;
+  }
+
+  async function renderToday(){
+    const slot = document.getElementById('todaySlot');
+    const routineGoals = routineGoalsOn(todayStr());
+    const roadmapGoals = roadmapGoalsOn(todayStr());
+    if(routineGoals.length===0 && roadmapGoals.length===0){
+      slot.innerHTML = `<div class="empty-state">오늘 진행 중인 목표가 없어요.<br>목표 탭에서 새 목표를 추가해보세요.</div>`;
+      return;
+    }
+    slot.innerHTML = `<div class="loadwrap"><div class="spinner"></div>오늘의 할 일을 준비하는 중...</div>`;
+
+    const routineRecords = await Promise.all(routineGoals.map(g=>ensureTodayRoutine(g)));
+    const settled = await Promise.allSettled(roadmapGoals.map(g=>ensureTodayQuest(g)));
+    const roadmapItems = roadmapGoals.map((g,i)=> settled[i].status==='fulfilled'
+      ? {goal:g, record:settled[i].value, error:null}
+      : {goal:g, record:null, error:String(settled[i].reason && settled[i].reason.message || settled[i].reason || '알 수 없는 오류')});
+
+    slot.innerHTML = todaySections(routineGoals, routineRecords, roadmapItems);
+    bindToday(routineGoals, routineRecords, roadmapItems);
+  }
+
+  function todaySections(routineGoals, routineRecords, roadmapItems){
+    let html = '';
+    if(routineGoals.length>0){
+      html += `<div class="qcard-label mono" style="margin:2px 0 10px;">루틴</div>`;
+      html += routineGoals.map((g,i)=> routineRow(g, routineRecords[i])).join('');
+      html += `<div style="height:8px;"></div>`;
+    }
+    if(roadmapItems.length>0){
+      if(routineGoals.length>0) html += `<div class="qcard-label mono" style="margin:6px 0 10px;">오늘의 할 일</div>`;
+      html += roadmapItems.map(it=> it.error ? errorItem(it) : checklistItem(it.goal, it.record)).join('');
+    }
+    html += `<div class="devrow"><button id="devNext">테스트용: 하루 넘기고 새로 받기 →</button></div>`;
+    return html;
+  }
+
+  function routineRow(goal, rec){
+    const cls = rec.status==='success'?'success':rec.status==='fail'?'fail':'';
+    const icon = rec.status==='success'?'✓':rec.status==='fail'?'✕':'';
+    return `<div class="routine-row" data-routine="${goal.id}">
+      <div class="clist-check ${cls}">${icon}</div>
+      <div class="clist-titles"><div class="clist-title">${escapeHtml(goal.title)}</div></div>
+    </div>`;
+  }
+
+  function errorItem(it){
+    return `<div class="clist-item"><div class="clist-body" style="padding:16px;border-top:none;">
+      <div class="errbox" style="margin-bottom:10px;">"${escapeHtml(it.goal.title)}" 할 일을 만드는 중 오류가 발생했어요.<br><span style="opacity:.8;">${escapeHtml(it.error)}</span></div>
+      <button class="btn small" data-retry="${it.goal.id}">다시 시도</button>
+    </div></div>`;
+  }
+
+  function checklistItem(goal, rec){
+    const open = expandedGoalId===goal.id;
+    const checkContent = rec.status==='success' ? '✓' : rec.status==='fail' ? '✕' : rec.status==='partial' ? (rec.percent+'%') : '';
+    return `<div class="clist-item ${open?'open':''}" data-goal="${goal.id}">
+      <div class="clist-head" data-toggle="${goal.id}">
+        <div class="clist-check ${rec.status!=='pending'?rec.status:''}">${checkContent}</div>
+        <div class="clist-titles">
+          <div class="clist-title">${escapeHtml(rec.questTitle)}</div>
+          <div class="clist-sub mono">${escapeHtml(goal.title)}</div>
+        </div>
+        <div class="clist-chev">▸</div>
+      </div>
+      ${open ? clistBody(goal, rec) : ''}
+    </div>`;
+  }
+
+  function clistBody(goal, rec){
+    const isNew = rec.status==='pending';
+    const editing = isNew || editingIds.has(goal.id);
+    let body = `<div class="clist-body">
+      <div class="qdesc">${escapeHtml(rec.questDesc)}</div>
+      <div class="qmeta"><span class="pill mono">⏱ 약 ${rec.estimatedMinutes}분</span></div>
+      ${rec.tips && rec.tips.length ? `<ul class="tips">${rec.tips.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul>` : ''}
+      ${rec.coachNote ? `<div class="coachnote">🎯 ${escapeHtml(rec.coachNote)}</div>` : ''}`;
+
+    if(editing){
+      const chosen = isNew ? null : rec.status;
+      const pct = rec.percent!=null ? rec.percent : 50;
+      const note = rec.note || '';
+      body += `
+      <div class="seg" id="segRow-${goal.id}">
+        <button data-v="success" class="${chosen==='success'?'active':''}">성공</button>
+        <button data-v="partial" class="${chosen==='partial'?'active':''}">진행중</button>
+        <button data-v="fail" class="${chosen==='fail'?'active':''}">실패</button>
+      </div>
+      <div class="pctrow ${chosen==='partial'?'show':''}" id="pctRow-${goal.id}">
+        <input type="range" id="pctSlider-${goal.id}" min="0" max="100" value="${pct}">
+        <span class="pctval mono" id="pctVal-${goal.id}">${pct}%</span>
+      </div>
+      <textarea id="noteInput-${goal.id}" placeholder="예) 예상보다 여유로웠어요 / 시간이 부족했어요 / 자료 찾는 데 오래 걸렸어요">${escapeHtml(note)}</textarea>
+      <div class="noteHint">이 메모가 내일 난이도 조절에 반영돼요.</div>
+      <button class="btn" id="submitBtn-${goal.id}" ${chosen?'':'disabled'}>기록 저장</button>
+      ${!isNew?`<button class="btn ghost" id="cancelEdit-${goal.id}" style="margin-top:8px;">취소</button>`:''}`;
+    } else {
+      body += `
+      <div class="doneBadge" style="margin-top:14px;">
+        <span class="dot ${rec.status}"></span>
+        <span class="mono" style="font-size:12px;color:var(--text-dim)">${statusLabel(rec.status)}${rec.status==='partial'?` · ${rec.percent}%`:''}</span>
+      </div>
+      ${rec.note?`<div class="hnote" style="font-size:12.5px;color:#9498a3;">"${escapeHtml(rec.note)}"</div>`:''}
+      <button class="btn ghost" id="editBtn-${goal.id}" style="margin-top:12px;">기록 수정</button>`;
+    }
+    body += `</div>`;
+    return body;
+  }
+
+  function bindToday(routineGoals, routineRecords, roadmapItems){
+    document.querySelectorAll('[data-routine]').forEach(row=>{
+      row.onclick = async ()=>{
+        const id = row.dataset.routine;
+        const list = await loadQuests(id);
+        const rec = list.find(r=>r.date===todayStr());
+        rec.status = rec.status==='pending' ? 'success' : rec.status==='success' ? 'fail' : 'pending';
+        await saveQuests(id);
+        renderToday();
+      };
+    });
+    document.querySelectorAll('[data-retry]').forEach(btn=>{
+      btn.onclick = ()=> renderToday();
+    });
+    document.querySelectorAll('[data-toggle]').forEach(h=>{
+      h.onclick = ()=>{
+        const id = h.dataset.toggle;
+        expandedGoalId = expandedGoalId===id ? null : id;
+        const slot = document.getElementById('todaySlot');
+        slot.innerHTML = todaySections(routineGoals, routineRecords, roadmapItems);
+        bindToday(routineGoals, routineRecords, roadmapItems);
+      };
+    });
+    roadmapItems.forEach(it=>{
+      if(it.error || expandedGoalId!==it.goal.id) return;
+      const g = it.goal, rec = it.record;
+      const isNew = rec.status==='pending';
+      const editing = isNew || editingIds.has(g.id);
+
+      if(!editing){
+        const editBtn = document.getElementById('editBtn-'+g.id);
+        if(editBtn) editBtn.onclick = (ev)=>{ ev.stopPropagation(); editingIds.add(g.id); renderToday(); };
+        return;
+      }
+
+      const seg = document.getElementById('segRow-'+g.id);
+      const pctRow = document.getElementById('pctRow-'+g.id);
+      const pctSlider = document.getElementById('pctSlider-'+g.id);
+      const pctVal = document.getElementById('pctVal-'+g.id);
+      const noteInput = document.getElementById('noteInput-'+g.id);
+      const submitBtn = document.getElementById('submitBtn-'+g.id);
+      const cancelBtn = document.getElementById('cancelEdit-'+g.id);
+      let chosen = isNew ? null : rec.status;
+
+      seg.querySelectorAll('button').forEach(btn=>{
+        btn.onclick = (ev)=>{
+          ev.stopPropagation();
+          chosen = btn.dataset.v;
+          seg.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          pctRow.classList.toggle('show', chosen==='partial');
+          submitBtn.disabled = false;
+        };
+      });
+      pctSlider.oninput = ()=>{ pctVal.textContent = pctSlider.value+'%'; };
+      submitBtn.onclick = async (ev)=>{
+        ev.stopPropagation();
+        submitBtn.disabled = true; submitBtn.textContent = '저장 중...';
+        rec.status = chosen;
+        rec.percent = chosen==='partial' ? Number(pctSlider.value) : (chosen==='success' ? 100 : 0);
+        rec.note = noteInput.value.trim();
+        await saveQuests(g.id);
+        editingIds.delete(g.id);
+        expandedGoalId = null;
+        renderToday();
+      };
+      if(cancelBtn){
+        cancelBtn.onclick = (ev)=>{
+          ev.stopPropagation();
+          editingIds.delete(g.id);
+          expandedGoalId = null;
+          renderToday();
+        };
+      }
+    });
+    const dn = document.getElementById('devNext');
+    if(dn) dn.onclick = async ()=>{ state.testOffset+=1; expandedGoalId=null; editingIds.clear(); await saveState(); renderToday(); };
+  }
+
+  // ================= RECORD (calendar) =================
+  function pctClass(p){ return p>=80?'hi':p>=40?'mid':'lo'; }
+
+  function recordView(){
+    if(selectedDate) return recordDetailView(selectedDate);
+    if(!calCursor){
+      const t = new Date(todayStr());
+      calCursor = { y: t.getFullYear(), m: t.getMonth() };
+    }
+    const {y,m} = calCursor;
+    const first = new Date(y,m,1);
+    const startWeekday = first.getDay();
+    const numDays = new Date(y,m+1,0).getDate();
+    const dows = ['일','월','화','수','목','금','토'];
+    const today = todayStr();
+
+    let cells = '';
+    for(let i=0;i<startWeekday;i++) cells += `<div class="cal-cell empty"></div>`;
+    for(let d=1; d<=numDays; d++){
+      const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isFuture = dateStr > today;
+      const isToday = dateStr === today;
+      const stats = isFuture ? null : getDayStats(dateStr);
+      const hasPct = stats && stats.percent!==null;
+      const cls = ['cal-cell'];
+      if(isFuture || !stats) cls.push('future');
+      else if(!hasPct) cls.push('nodata');
+      if(isToday) cls.push('today');
+      cells += `<div class="${cls.join(' ')}" ${(!isFuture && stats)?`data-date="${dateStr}"`:''}>
+        <div class="cd-num mono">${d}</div>
+        ${hasPct?`<div class="cd-pct ${pctClass(stats.percent)}">${stats.percent}%</div>`:''}
+      </div>`;
+    }
+
+    return `<div class="qmain">
+      <div class="card">
+        <div class="cal-nav">
+          <button id="calPrev">‹</button>
+          <div class="cal-title">${y}년 ${m+1}월</div>
+          <button id="calNext">›</button>
+        </div>
+        <div class="cal-grid">
+          ${dows.map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+          ${cells}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function getDayStats(dateStr){
+    const applicable = goalsActiveOn(dateStr);
+    if(applicable.length===0) return null;
+    const items = applicable.map(g=>({
+      goal:g, rec:(questCache[g.id]||[]).find(r=>r.date===dateStr)
+    }));
+    const answered = items.filter(x=>x.rec && x.rec.status && x.rec.status!=='pending');
+    const percent = answered.length===0 ? null : Math.round(
+      answered.reduce((s,x)=> s + (x.rec.status==='success'?100:x.rec.status==='fail'?0:(x.rec.percent||0)),0) / answered.length
+    );
+    return { items, percent };
+  }
+
+  function recordDetailView(dateStr){
+    const stats = getDayStats(dateStr);
+    const items = stats ? stats.items : [];
+    return `<div class="qmain">
+      <button class="detail-back" id="backToCal">‹ 캘린더로</button>
+      <div class="card">
+        <div class="qcard-label mono">${dateStr}</div>
+        <div class="bigpct">${stats && stats.percent!==null ? stats.percent+'%' : '–'}</div>
+        <div class="bigpct-label">이날 전체 목표 수행률</div>
+      </div>
+      <div class="card" style="padding:6px 18px;">
+        ${items.length===0 ? `<div style="padding:14px 0;color:var(--text-dim);font-size:13px;">이 날짜에 진행 중이던 목표가 없어요.</div>` :
+        items.map(x=>`
+          <div class="hitem" style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px;" class="mono">${escapeHtml(x.goal.title)}</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:3px;">${x.rec?escapeHtml(x.rec.questTitle):'(기록 없음)'}</div>
+              ${x.rec && x.rec.note?`<div style="font-size:12.5px;color:#9498a3;line-height:1.5;">"${escapeHtml(x.rec.note)}"</div>`:''}
+            </div>
+            ${x.rec && x.rec.status && x.rec.status!=='pending' ? `<span class="hstatus ${x.rec.status}" style="font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;flex-shrink:0;height:20px;background:rgba(255,255,255,.06);">${statusLabel(x.rec.status)}${x.rec.status==='partial'?` ${x.rec.percent}%`:''}</span>` :
+              `<span class="hstatus" style="font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;flex-shrink:0;height:20px;color:var(--text-dim);">미기록</span>`}
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  async function bindRecord(){
+    await loadAllQuests();
+    root.innerHTML = genericHeader('기록', selectedDate ? '일별 수행 기록' : '캘린더') + recordView() + navView();
+    bindNav();
+    if(selectedDate){
+      document.getElementById('backToCal').onclick = ()=>{ selectedDate=null; bindRecord(); };
+      return;
+    }
+    const prev = document.getElementById('calPrev');
+    const next = document.getElementById('calNext');
+    prev.onclick = ()=>{ calCursor.m--; if(calCursor.m<0){calCursor.m=11;calCursor.y--;} bindRecord(); };
+    next.onclick = ()=>{ calCursor.m++; if(calCursor.m>11){calCursor.m=0;calCursor.y++;} bindRecord(); };
+    document.querySelectorAll('.cal-cell[data-date]').forEach(c=>{
+      c.onclick = ()=>{ selectedDate = c.dataset.date; bindRecord(); };
+    });
+  }
+
+  // ================= GOALS =================
+  function goalsView(){
+    if(goalFormOpen) return goalFormView();
+    return `<div class="qmain">
+      <button class="btn" id="newGoalBtn" style="margin-bottom:16px;">+ 새 목표 추가</button>
+      ${state.goals.length===0 ? `<div class="empty-state">아직 설정한 목표가 없어요.</div>` :
+      `<div class="card" style="padding:6px 18px;">
+        ${state.goals.map(g=>`
+          <div class="glist-item">
+            <div class="glist-row">
+              <div style="flex:1;min-width:0;">
+                <div class="glist-title">${escapeHtml(g.title)}</div>
+                <div class="pill mono">${g.type==='routine' ? `루틴 · ${g.startDate}부터 매일` : `로드맵 · ${g.startDate} ~ ${g.endDate}`}</div>
+              </div>
+              <button class="btn danger small" style="width:auto;padding:7px 12px;flex-shrink:0;" data-del="${g.id}">삭제</button>
+            </div>
+          </div>`).join('')}
+      </div>`}
+    </div>`;
+  }
+
+  function goalFormView(){
+    return `<div class="qmain onbd">
+      <p class="sub">목표를 입력하고, 로드맵 목표라면 시작일·종료일을 함께 설정하세요. 루틴은 매일 반복이라 기간이 필요 없어요.</p>
+      <label class="flabel">목표</label>
+      <input type="text" id="goalTitle" placeholder="예) 배터리 전공 논문 3편 정리 + 개인 프로젝트 완성">
+      <label class="flabel">유형</label>
+      <div class="seg" id="typeSeg" style="margin-top:0;">
+        <button type="button" data-t="roadmap" class="active">로드맵 목표</button>
+        <button type="button" data-t="routine">루틴</button>
+      </div>
+      <div class="noteHint" id="typeHint" style="margin-top:8px;">AI가 진행 상황과 기록을 보고 매일 난이도를 조절해서 할 일을 만들어줘요.</div>
+      <div id="dateSection">
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;">
+            <label class="flabel">시작일</label>
+            <input type="date" id="startDate">
+          </div>
+          <div style="flex:1;">
+            <label class="flabel">종료일</label>
+            <input type="date" id="endDate">
+          </div>
+        </div>
+        <div id="rangeInfo" class="noteHint" style="margin-top:8px;"></div>
+      </div>
+      <button class="btn" id="startBtn" style="margin-top:16px;" disabled>목표 추가하기</button>
+      <button class="btn ghost" id="cancelAdd" style="margin-top:10px;">취소</button>
+    </div>`;
+  }
+
+  function bindGoals(){
+    if(goalFormOpen){ bindGoalForm(); return; }
+    document.getElementById('newGoalBtn').onclick = ()=>{ goalFormOpen=true; render(); };
+    document.querySelectorAll('[data-del]').forEach(b=>{
+      b.onclick = async ()=>{
+        state.goals = state.goals.filter(g=>g.id!==b.dataset.del);
+        await saveState();
+        render();
+      };
+    });
+  }
+
+  function bindGoalForm(){
+    const startBtn = document.getElementById('startBtn');
+    const titleInput = document.getElementById('goalTitle');
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    const rangeInfo = document.getElementById('rangeInfo');
+    const typeSeg = document.getElementById('typeSeg');
+    const typeHint = document.getElementById('typeHint');
+    const dateSection = document.getElementById('dateSection');
+    startInput.value = todayStr();
+    startInput.min = todayStr();
+    let chosenType = 'roadmap';
+
+    typeSeg.querySelectorAll('button').forEach(btn=>{
+      btn.onclick = ()=>{
+        chosenType = btn.dataset.t;
+        typeSeg.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        dateSection.style.display = chosenType==='routine' ? 'none' : 'block';
+        typeHint.textContent = chosenType==='routine'
+          ? '매일 똑같이 반복할 습관이에요. 기간 없이 오늘부터 계속 반복되고, 오늘 탭 상단에 별도 체크리스트로 표시돼요.'
+          : 'AI가 진행 상황과 기록을 보고 매일 난이도를 조절해서 할 일을 만들어줘요.';
+        checkReady();
+      };
+    });
+
+    function checkReady(){
+      if(chosenType==='routine'){
+        startBtn.disabled = titleInput.value.trim().length===0;
+        return;
+      }
+      const ok = titleInput.value.trim().length>0 && startInput.value && endInput.value && endInput.value > startInput.value;
+      startBtn.disabled = !ok;
+      if(startInput.value && endInput.value){
+        const n = daysBetween(startInput.value, endInput.value);
+        rangeInfo.textContent = n>0 ? `총 ${n+1}일짜리 로드맵이에요.` : '종료일은 시작일보다 뒤여야 해요.';
+      } else rangeInfo.textContent = '';
+    }
+    titleInput.oninput = checkReady;
+    startInput.onchange = ()=>{ endInput.min = startInput.value; checkReady(); };
+    endInput.onchange = checkReady;
+    checkReady();
+
+    startBtn.onclick = async ()=>{
+      const isRoutine = chosenType==='routine';
+      const g = {
+        id:'g_'+Date.now(), title:titleInput.value.trim(), type:chosenType,
+        startDate: isRoutine ? todayStr() : startInput.value,
+        endDate: isRoutine ? addDays(todayStr(), 3650) : endInput.value,
+        createdAt:Date.now()
+      };
+      state.goals.push(g);
+      goalFormOpen = false;
+      await saveState();
+      render();
+    };
+    document.getElementById('cancelAdd').onclick = ()=>{ goalFormOpen=false; render(); };
+  }
+
+  // ================= NAV / ROOT RENDER =================
+  function navView(){
+    return `<div class="qnav">
+      <button data-v="today" class="${state.view==='today'?'active':''}">오늘</button>
+      <button data-v="record" class="${state.view==='record'?'active':''}">기록</button>
+      <button data-v="goals" class="${state.view==='goals'?'active':''}">목표</button>
+    </div>`;
+  }
+  function bindNav(){
+    document.querySelectorAll('.qnav button').forEach(b=>{
+      b.onclick = ()=>{
+        state.view = b.dataset.v;
+        if(state.view!=='record') selectedDate = null;
+        render();
+      };
+    });
+  }
+
+  function render(){
+    if(state.view==='today'){
+      root.innerHTML = todayHeader() + loadingShell() + navView();
+      bindNav();
+      bindNotifBanner();
+      renderToday();
+    } else if(state.view==='record'){
+      bindRecord();
+    } else if(state.view==='goals'){
+      root.innerHTML = genericHeader('목표', goalFormOpen ? '새 목표 추가' : '목표 관리') + goalsView() + navView();
+      bindNav();
+      bindGoals();
+    }
+  }
+
+  // ---------- boot ----------
+  (async function init(){
+    root.innerHTML = `<div class="loadwrap"><div class="spinner"></div>불러오는 중...</div>`;
+    await loadState();
+    await loadAllQuests();
+    if(state.goals.length===0){ state.view='goals'; goalFormOpen=true; }
+    render();
+    maybeNotify();
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) maybeNotify(); });
+    setInterval(maybeNotify, 5*60*1000);
+  })();
+})();
+</script>
+
+# 적응형 로드맵 퀘스트 — Vercel 배포용 (완전 무료 / Groq)
+
+`api/quest.js`가 Anthropic 유료 API 대신 **Groq 무료 티어**를 호출해요.
+API 키는 서버에서만 쓰이고 브라우저 코드에는 절대 노출되지 않아요.
+
+## 배포 방법 (AICE 사이트 때와 동일)
+
+1. https://console.groq.com/keys 에서 무료 계정 만들고 API 키 발급
+2. 이 폴더에서 배포
+   ```
+   vercel
+   ```
+3. Vercel 대시보드 → 프로젝트 → **Settings → Environment Variables**
+   - Key: `GROQ_API_KEY`
+   - Value: 방금 발급받은 키
+   추가 후 다시 배포
+   ```
+   vercel --prod
+   ```
+4. 배포된 URL을 아이폰 사파리로 열고 "홈 화면에 추가"하면 앱처럼 설치돼요.
+
+## 참고
+
+- 모델은 `llama-3.3-70b-versatile` (Groq 무료 티어에서 제공). 필요하면 `api/quest.js`에서 다른 Groq 모델로 바꿀 수 있어요.
+- 무료 티어는 분당/일일 요청 수 제한이 있는데, 이 앱은 목표 하나당 하루 1번만 호출하는 구조라 일반적인 사용량에서는 문제 없어요.
+- Claude(Anthropic)보다 JSON 형식을 가끔 덜 정확하게 지킬 수 있어요. 이미 앱 쪽 파싱 로직이 앞뒤에 불필요한 텍스트가 붙어도 `{...}` 부분만 추출하도록 되어 있어서 웬만한 경우는 커버돼요. 그래도 "AI 응답 형식이 올바르지 않아요" 오류가 자주 뜨면 알려주세요 — 프롬프트를 더 다듬거나 다른 모델로 바꿀 수 있어요.
+- 로컬 테스트는 `vercel dev`로 실행해야 서버 함수가 동작해요. `index.html`을 그냥 더블클릭해서 열면 "Failed to fetch"가 떠요.
+- 나중에 마음이 바뀌면 `api/quest.js`만 Anthropic API 호출로 바꿔서 유료 전환도 가능해요 (이전 버전 코드는 대화 기록에 남아있어요).
