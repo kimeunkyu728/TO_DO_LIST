@@ -8,6 +8,16 @@
 // doesn't need to know which provider is behind this endpoint.
 
 export default async function handler(req, res) {
+  // Allow calls from other origins (e.g. a Netlify-hosted copy of the frontend).
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     res.status(405).json({ error: { message: 'Method not allowed' } });
     return;
